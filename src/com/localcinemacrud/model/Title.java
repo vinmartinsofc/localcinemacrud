@@ -12,85 +12,108 @@ public class Title implements Operations {
     private Year releaseDate;
     private String director;
     private int duration;
-    Category category;
-    private final Map<String, Title> storage = new HashMap<>();
-    int titleKey;
+    private String category;
+    private Map<String, Title> storage = new HashMap<>();
+    private int keyInt;
+    private String keyString = "TK";
+    private String nameCondition = "Movie";
+
 
     public Title() {
-        SecureRandom secureRandom = new SecureRandom();
-        titleKey = 1 + secureRandom.nextInt(1000);
+
     }
 
-    public Title(String name, Year releaseDate, String director, int duration, Category category, int titleKey) {
+    public Title(String name, Year releaseDate, String director, int duration, String category) {
         this.name = name;
         this.releaseDate = releaseDate;
         this.director = director;
         this.duration = duration;
         this.category = category;
-        this.titleKey = titleKey;
+
+        SecureRandom secureRandom = new SecureRandom();
+        keyInt = 1 + secureRandom.nextInt(1000);
     }
 
-    public void menu() {
-        System.out.println("1 - save movie");
-        System.out.println("2 - save series");
-        System.out.println("3 - delete movie");
-        System.out.println("4 - delete series");
-        System.out.println("5 - update movie");
-        System.out.println("6 - update series");
-        System.out.println("7 - listAll movies");
-        System.out.println("8 - listAll series");
-        System.out.println("9 - Get movie By Id");
-        System.out.println("10 - Get series By Id");
-
+    public Title(String name, Year releaseDate, String category) {
+        this.name = name;
+        this.releaseDate = releaseDate;
+        this.category = category;
     }
-
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Year getReleaseDate() {
         return releaseDate;
     }
 
-    public String getDirector() {
-        return director;
+    public void setReleaseDate(Year releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
-    public Category getCategory() {
+    public String getCategory() {
         return category;
     }
 
-    @Override
-    public String toString() {
-        return "Title{" +
-                ", name='" + name + '\'' +
-                ", releaseDate=" + releaseDate +
-                ", director='" + director + '\'' +
-                ", duration=" + duration +
-                ", category=" + category +
-                '}';
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void menu() {
+        System.out.println("1 - Save");
+        System.out.println("2 - Get All");
+        System.out.println("3 - Update");
+        System.out.println("4 - Delete");
+        System.out.println("5 - Watchlist");
+        System.out.println("6 - Watched");
+        System.out.println("0 - Exit");
+
     }
 
     @Override
     public void save(Title title) {
-        String generatedKey = "TK" + titleKey;
-        storage.put(generatedKey, title);
+
+        if (title instanceof Series) {
+            keyString = "TKS";
+            nameCondition = "Series";
+        }
+
+        if (storage.containsKey(keyString + keyInt)) {
+            System.out.println("Key already in use, try again");
+            return;
+        }
+
+        storage.put(keyString + keyInt, title);
+
+    }
+
+    public void getAll() {
+        if (storage.isEmpty()) {
+            System.out.println("Storage is empty");
+            return;
+        }
+
+        storage.forEach((key, title) -> {
+            String msg = key + ": " + title;
+            System.out.println(msg);
+        });
     }
 
     @Override
-    public void delete(String id) {
+    public void getById(String id) {
         if (!storage.containsKey(id)) {
             System.out.println("There's no such key");
         }
 
-        storage.remove(id);
+        System.out.println(storage.get(id));
 
     }
+
 
     @Override
     public void update(String id) {
@@ -98,23 +121,30 @@ public class Title implements Operations {
     }
 
     @Override
-    public Map<String, Title> getAll() {
-        return storage;
-    }
-
-    @Override
-    public void getById(String id) {
-
+    public void delete(String id) {
         if (!storage.containsKey(id)) {
             System.out.println("There's no such key");
             return;
         }
 
-        System.out.println(storage.get(id));
-
+        storage.remove(keyString + keyInt);
 
     }
 
+    public Map<String, Title> getStorage() {
+        return storage;
+    }
 
-
+    @Override
+    public String toString() {
+        return String.format("%s%n%s%n%s%n%s%n%s%n%s%n%s%n%s%n",
+                "** Title (" + nameCondition + ") **",
+                "id: " + keyString + keyInt,
+                "name: " + name,
+                "release: " + releaseDate,
+                "director: "+ director,
+                "duration: " + duration,
+                "category: " + category,
+                "** ** ** ** **");
+    }
 }

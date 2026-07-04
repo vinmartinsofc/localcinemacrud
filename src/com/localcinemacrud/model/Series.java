@@ -1,15 +1,32 @@
 package com.localcinemacrud.model;
 
+import java.time.Year;
+
 public class Series extends Title {
     private String creator;
-    private boolean isFinished;
+    private boolean seasonEnded;
 
-    public Series(Title title, String creator, boolean isFinished) {
-        super();
-        this.creator = creator;
-        this.isFinished = isFinished;
+
+    public Series() {
+
     }
 
+
+    public Series(String name, Year releaseDate, String category, String creator, boolean seasonEnded) {
+        this.setName(name);
+        this.setReleaseDate(releaseDate);
+        this.setCategory(category);
+        this.creator = creator;
+        this.seasonEnded = seasonEnded;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public boolean isSeasonEnded() {
+        return seasonEnded;
+    }
 }
 
 
