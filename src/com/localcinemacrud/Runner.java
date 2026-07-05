@@ -12,47 +12,20 @@ public class Runner {
 
         Scanner scanner = new Scanner(System.in);
         var setNewTitle = new Title();
-        Movie movie = new Movie();
-        Series series = new Series();
+        int option;
 
-        setNewTitle.menu();
-        int option = Integer.parseInt(scanner.nextLine());
 
-        while (option != 0) {
+        do  {
+            setNewTitle.menu();
+            option = Integer.parseInt(scanner.nextLine());
 
             switch (option) {
                 case 1: {
-
-                    System.out.print("Movie or Series? ");
-                    String internalOption = scanner.nextLine();
-
-                    if (internalOption.equalsIgnoreCase("Series")) {
-                        System.out.print("Creator: ");
-                        String creator = scanner.nextLine();
-
-                        System.out.print("Has it ended? ");
-                        boolean isFinished = Boolean.parseBoolean(scanner.nextLine());
-
-                        System.out.print("Name: ");
-                        String name = scanner.nextLine();
-
-                        System.out.print("Release date: ");
-                        Year releaseDate = Year.of(Integer.parseInt(scanner.nextLine()));
-
-                        System.out.print("Category: ");
-                        String category = scanner.nextLine();
-
-                        series.save(new Series(name, releaseDate, category, creator,isFinished));
-
-                        continue;
-
-                    }
-
                     System.out.print("Name: ");
                     String name = scanner.nextLine();
 
-                    System.out.print("Release date: ");
-                    Year releaseDate = Year.of(Integer.parseInt(scanner.nextLine()));
+                    System.out.print("Release Date: ");
+                    Year year = Year.of(Integer.parseInt(scanner.nextLine()));
 
                     System.out.print("Director: ");
                     String director = scanner.nextLine();
@@ -63,22 +36,70 @@ public class Runner {
                     System.out.print("Category: ");
                     String category = scanner.nextLine();
 
-                    movie.save(new Movie(name, releaseDate, director, duration, category));
+                    System.out.print("Genre: ");
+                    String genre = scanner.nextLine();
 
+                    setNewTitle.save(new Movie(name, year, director, duration, category, genre));
                 }
 
-                case 2: {
-                    setNewTitle.getAll();
+                break;
+
+                case 2:{
+
+                    System.out.print("Creator: ");
+                    String creator = scanner.nextLine();
+
+                    System.out.print("Ended? (y/n) ");
+                    String seriesEnded = scanner.nextLine();
+                    boolean end = seriesEnded.equalsIgnoreCase("y");
+
+                    System.out.print("Name: ");
+                    String name = scanner.nextLine();
+
+                    System.out.print("Release Date: ");
+                    Year year = Year.of(Integer.parseInt(scanner.nextLine()));
+
+                    System.out.print("Category: ");
+                    String category = scanner.nextLine();
+
+                    System.out.print("Genre: ");
+                    String genre = scanner.nextLine();
+
+                    setNewTitle.save(new Series(creator, end, name,year, category, genre));
                 }
 
+                break;
+
+                case 3: {
+                    setNewTitle.getAllMovies();
+                }
+                break;
+
+                case 4:{
+                    setNewTitle.getAllSeries();
+                }
+
+                break;
+
+                case 5: {
+                    System.out.print("id? ");
+                    Long id = Long.parseLong(scanner.nextLine());
+                    setNewTitle.getMovieById(id);
+                }
+
+                break;
+
+                case 6: {
+                    System.out.print("id? ");
+                    Long id = Long.parseLong(scanner.nextLine());
+                    setNewTitle.getSeriesById(id);
+                }
 
 
             }
 
-            setNewTitle.menu();
-            option = Integer.parseInt(scanner.nextLine());
 
-        }
+        } while (option != 0);
 
 
 

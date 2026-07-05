@@ -1,43 +1,37 @@
 package com.localcinemacrud.model;
 
-import com.localcinemacrud.service.Operations;
-
 import java.security.SecureRandom;
 import java.time.Year;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Title implements Operations {
+public class Title {
     private String name;
     private Year releaseDate;
     private String director;
     private int duration;
     private String category;
-    private Map<String, Title> storage = new HashMap<>();
-    private int keyInt;
-    private String keyString = "TK";
-    private String nameCondition = "Movie";
+    private String genre;
+
+
+    private final Map<Long, Title> moviesDB = new HashMap<>();
+    private final Map<Long, Title> seriesDB = new HashMap<>();
+    private Map<Long, Title> watchList = new HashMap<>();
+    private final SecureRandom secureRandom = new SecureRandom();
 
 
     public Title() {
 
     }
 
-    public Title(String name, Year releaseDate, String director, int duration, String category) {
+    public Title(String name, Year releaseDate, String director, int duration, String category, String genre) {
         this.name = name;
         this.releaseDate = releaseDate;
         this.director = director;
         this.duration = duration;
         this.category = category;
+        this.genre = genre;
 
-        SecureRandom secureRandom = new SecureRandom();
-        keyInt = 1 + secureRandom.nextInt(1000);
-    }
-
-    public Title(String name, Year releaseDate, String category) {
-        this.name = name;
-        this.releaseDate = releaseDate;
-        this.category = category;
     }
 
     public String getName() {
@@ -56,6 +50,22 @@ public class Title implements Operations {
         this.releaseDate = releaseDate;
     }
 
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     public String getCategory() {
         return category;
     }
@@ -64,87 +74,120 @@ public class Title implements Operations {
         this.category = category;
     }
 
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
     public void menu() {
-        System.out.println("1 - Save");
-        System.out.println("2 - Get All");
-        System.out.println("3 - Update");
-        System.out.println("4 - Delete");
-        System.out.println("5 - Watchlist");
-        System.out.println("6 - Watched");
+        System.out.println("1 - Save Movie");
+        System.out.println("2 - Save Series");
+        System.out.println("3 - Get All Movies");
+        System.out.println("4 - Get All Series");
+        System.out.println("5 - Get Movie By Id");
+        System.out.println("6 - Get Series By Id");
+        System.out.println("7 - Update");
+        System.out.println("8 - Delete");
+        System.out.println("9 - Watchlist");
+        System.out.println("10 - Watched");
         System.out.println("0 - Exit");
 
     }
 
-    @Override
+
     public void save(Title title) {
+        long generatedKey = 1 + secureRandom.nextInt(1000);
 
-        if (title instanceof Series) {
-            keyString = "TKS";
-            nameCondition = "Series";
-        }
-
-        if (storage.containsKey(keyString + keyInt)) {
+        if (moviesDB.containsKey(generatedKey)) {
             System.out.println("Key already in use, try again");
             return;
         }
 
-        storage.put(keyString + keyInt, title);
+        if (title instanceof Series) {
+            seriesDB.put(generatedKey, title);
+        }
+
+        moviesDB.put(generatedKey, title);
 
     }
 
-    public void getAll() {
-        if (storage.isEmpty()) {
+    public void getAllMovies() {
+        if (moviesDB.isEmpty()) {
             System.out.println("Storage is empty");
             return;
         }
 
-        storage.forEach((key, title) -> {
-            String msg = key + ": " + title;
+        moviesDB.forEach((key, value) -> {
+            String msg = key + ": " + value;
             System.out.println(msg);
         });
     }
 
-    @Override
-    public void getById(String id) {
-        if (!storage.containsKey(id)) {
-            System.out.println("There's no such key");
+    public void getAllSeries() {
+        if (moviesDB.isEmpty()) {
+            System.out.println("Storage is empty");
+            return;
         }
 
-        System.out.println(storage.get(id));
-
+        seriesDB.forEach((key, value) -> {
+            String msg = key + ": " + value;
+            System.out.println(msg);
+        });
     }
 
-
-    @Override
-    public void update(String id) {
-
-    }
-
-    @Override
-    public void delete(String id) {
-        if (!storage.containsKey(id)) {
+    public void getMovieById(Long id) {
+        if (!moviesDB.containsKey(id)) {
             System.out.println("There's no such key");
             return;
         }
 
-        storage.remove(keyString + keyInt);
+        System.out.println(moviesDB.get(id));
+    }
+
+
+    public void getSeriesById(Long id) {
+        if (!moviesDB.containsKey(id)) {
+            System.out.println("There's no such key");
+            return;
+        }
+
+        System.out.println(seriesDB.get(id));
+    }
+
+    public void update(Long id) {
 
     }
 
-    public Map<String, Title> getStorage() {
-        return storage;
+    public void delete(Long id) {
+        if (!moviesDB.containsKey(id)) {
+            System.out.println("There's no such key");
+            return;
+        }
+
+        moviesDB.remove(id);
+
     }
 
     @Override
     public String toString() {
-        return String.format("%s%n%s%n%s%n%s%n%s%n%s%n%s%n%s%n",
-                "** Title (" + nameCondition + ") **",
-                "id: " + keyString + keyInt,
-                "name: " + name,
-                "release: " + releaseDate,
-                "director: "+ director,
-                "duration: " + duration,
-                "category: " + category,
-                "** ** ** ** **");
+        return "Title{" +
+                "name='" + name + '\'' +
+                ", releaseDate=" + releaseDate +
+                ", director='" + director + '\'' +
+                ", duration=" + duration +
+                ", category='" + category + '\'' +
+                ", genre='" + genre + '\'' +
+                '}';
+    }
+
+    public Map<Long, Title> getWatchList() {
+        return watchList;
+    }
+
+    public void setWatchList(Map<Long, Title> watchList) {
+        this.watchList = watchList;
     }
 }

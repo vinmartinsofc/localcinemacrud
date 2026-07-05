@@ -4,28 +4,26 @@ import java.time.Year;
 
 public class Series extends Title {
     private String creator;
-    private boolean seasonEnded;
+    private boolean seriesEnded;
 
 
     public Series() {
 
     }
 
-
-    public Series(String name, Year releaseDate, String category, String creator, boolean seasonEnded) {
-        this.setName(name);
-        this.setReleaseDate(releaseDate);
-        this.setCategory(category);
+    public Series(String creator, boolean seasonEnded) {
         this.creator = creator;
-        this.seasonEnded = seasonEnded;
+        this.seriesEnded = seasonEnded;
     }
 
-    public String getCreator() {
-        return creator;
-    }
 
-    public boolean isSeasonEnded() {
-        return seasonEnded;
+    public Series(String creator, boolean seriesEnded, String name, Year releaseDate, String category, String genre) {
+        this.creator = creator;
+        this.seriesEnded = seriesEnded;
+        super.setName(name);
+        super.setReleaseDate(releaseDate);
+        super.setCategory(category);
+        super.setGenre(genre);
     }
 }
 
