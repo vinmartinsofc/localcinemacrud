@@ -45,13 +45,9 @@ public class Series extends Title {
 
     @Override
     public String toString() {
-       String msg = "No";
-
-       if (newSeasons) {
-           msg = "Yes";
-       }
-
-        return String.format("Series Name: %s (%d), Category: %s, Genre: %s, Creator: %s, New Seasons: %s%n", getName(), getReleaseDate(), getCategory(), getGenre(), getCreator(), msg);
+        String msg = newSeasons ? "Yes" : "No";
+        return String.format("[%d] Series Name: %s (%d), Category: %s, Genre: %s, Creator: %s, New Seasons: %s%n",
+                getId(), getName(), getReleaseDate(), getCategory(), getGenre(), getCreator(), msg);
     }
 }
 

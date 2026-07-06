@@ -1,6 +1,15 @@
 package com.localcinemacrud.model;
 
 public class Title {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    private int id;
     private String name;
     private int releaseDate;
     private String category;
@@ -68,10 +77,12 @@ public class Title {
     @Override
     public String toString() {
         return "Title{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", releaseDate=" + releaseDate +
                 ", category='" + category + '\'' +
                 ", genre='" + genre + '\'' +
+                ", duration=" + duration +
                 '}';
     }
 }

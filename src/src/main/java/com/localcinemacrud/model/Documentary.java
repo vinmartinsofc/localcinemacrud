@@ -22,6 +22,7 @@ public class Documentary extends Title{
 
     @Override
     public String toString() {
-        return String.format("Documentary Name: %s (%d), Category: %s, Genre: %s, Creator: %s, Duration: %d", getName(), getReleaseDate(), getCategory(), getGenre(), getCreator(), getDuration());
+        return String.format("[%d] Documentary Name: %s (%d), Category: %s, Genre: %s, Creator: %s, Duration: %d",
+                getId(), getName(), getReleaseDate(), getCategory(), getGenre(), getCreator(), getDuration());
     }
 }

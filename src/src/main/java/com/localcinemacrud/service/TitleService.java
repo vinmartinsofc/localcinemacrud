@@ -15,9 +15,11 @@ public class TitleService {
         System.out.println("4 - Get By Id");
         System.out.println("5 - Update");
         System.out.println("6 - Delete");
-        System.out.println("7 - Watchlist");
-        System.out.println("8 - Watched");
+        System.out.println("7 - Search by Name");
+        System.out.println("8 - Add Watched");
         System.out.println("9 - Save Documentary");
+        System.out.println("10 - List Watched");
+        System.out.println("11 - Delete Watched");
         System.out.println("0 - Exit");
     }
 
@@ -57,4 +59,16 @@ public class TitleService {
     public void delete(Integer id) {
         repository.delete(id);
     }
+
+    public void searchByName(String name) {
+        List<Title> titles = repository.searchByName(name);
+
+        if (titles.isEmpty()) {
+            System.out.println("No titles found for: " + name);
+            return;
+        }
+
+        titles.forEach(System.out::println);
+    }
+
 }

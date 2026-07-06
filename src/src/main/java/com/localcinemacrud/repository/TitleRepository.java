@@ -16,12 +16,12 @@ public class TitleRepository {
         return DriverManager.getConnection(url, user, password);
     }
 
-    public void save(Title title) {
+    public int save(Title title) {
         String sql = "INSERT INTO titles (name, release_date, category, genre, director, duration, creator, new_seasons) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, title.getName());
             stmt.setInt(2, title.getReleaseDate());
@@ -51,11 +51,21 @@ public class TitleRepository {
             }
 
             stmt.executeUpdate();
-            System.out.println("Saved successfully");
+
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    int generatedId = keys.getInt(1);
+                    title.setId(generatedId);
+                    System.out.println("Saved successfully with id " + generatedId);
+                    return generatedId;
+                }
+            }
 
         } catch (SQLException e) {
             System.out.println("Error saving title: " + e.getMessage());
         }
+
+        return -1;
     }
 
     public List<Title> getAll() {
@@ -139,11 +149,34 @@ public class TitleRepository {
             title = movie;
         }
 
+        title.setId(rs.getInt("id"));
         title.setName(rs.getString("name"));
         title.setReleaseDate(rs.getInt("release_date"));
         title.setCategory(category);
         title.setGenre(rs.getString("genre"));
 
         return title;
+    }
+
+    public List<Title> searchByName(String name) {
+        List<Title> titles = new ArrayList<>();
+        String sql = "SELECT * FROM titles WHERE name ILIKE ? ORDER BY name";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + name + "%");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    titles.add(mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error searching titles: " + e.getMessage());
+        }
+
+        return titles;
     }
 }

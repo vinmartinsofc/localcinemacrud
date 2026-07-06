@@ -38,6 +38,7 @@ public class Movie extends Title {
 
     @Override
     public String toString() {
-        return String.format("Movie Name: %s (%d), Category: %s, Genre: %s, Director: %s, Duration: %d", getName(), getReleaseDate(), getCategory(), getGenre(), getDirector(), getDuration());
+        return String.format("[%d] Movie Name: %s (%d), Category: %s, Genre: %s, Director: %s, Duration: %d",
+                getId(), getName(), getReleaseDate(), getCategory(), getGenre(), getDirector(), getDuration());
     }
 }

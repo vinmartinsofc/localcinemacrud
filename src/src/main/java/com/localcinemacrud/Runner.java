@@ -2,7 +2,9 @@ package com.localcinemacrud;
 
 import com.localcinemacrud.model.*;
 import com.localcinemacrud.service.TitleService;
+import com.localcinemacrud.service.WatchedService;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Runner {
@@ -10,6 +12,7 @@ public class Runner {
 
         Scanner scanner = new Scanner(System.in);
         var setNewTitle = new TitleService();
+        var watchedService = new WatchedService();
         int option;
 
         try {
@@ -102,12 +105,27 @@ public class Runner {
                     break;
 
                     case 7: {
+                        System.out.print("Search by name: ");
+                        String query = scanner.nextLine();
+                        setNewTitle.searchByName(query);
 
                     }
                     break;
 
                     case 8: {
+                        System.out.print("Title id (assistido): ");
+                        int titleId = Integer.parseInt(scanner.nextLine());
 
+                        System.out.print("Watched date (yyyy-MM-dd): ");
+                        LocalDate date = LocalDate.parse(scanner.nextLine());
+
+                        System.out.print("Rating (0-10): ");
+                        double rating = Double.parseDouble(scanner.nextLine());
+
+                        System.out.print("Comment: ");
+                        String comment = scanner.nextLine();
+
+                        watchedService.save(titleId, date, rating, comment);
 
                     }
 
@@ -137,6 +155,17 @@ public class Runner {
                     }
 
                     break;
+
+                    case 10: {
+                        watchedService.getAll();
+                    }
+                    break;
+
+                    case 11: {
+                        System.out.print("Watched entry id to delete: ");
+                        int id = Integer.parseInt(scanner.nextLine());
+                        watchedService.delete(id);
+                    }
 
                     default:
                         System.out.println("Invalid");
