@@ -9,7 +9,7 @@ public class Runner {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        var setNewTitle = new TitleService(); // era: new Title()
+        var setNewTitle = new TitleService();
         int option;
 
         try {
