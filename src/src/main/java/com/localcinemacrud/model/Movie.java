@@ -3,23 +3,22 @@ package com.localcinemacrud.model;
 
 public class Movie extends Title {
     private String director;
-    private int duration;
 
     public Movie() {
     }
 
     public Movie(String director, int duration) {
         this.director = director;
-        this.duration = duration;
+        this.setDuration(duration);
     }
 
-    public Movie(String name, int releaseDate, Category category, Genres genre, String director, int duration) {
+    public Movie(String name, int releaseDate, String category, String genre, String director, int duration) {
         super(name, releaseDate, category, genre);
         this.director = director;
-        this.duration = duration;
+        this.setDuration(duration);
     }
 
-    public Movie(String name, int releaseDate, String director, int duration, Category category, Genres genre) {
+    public Movie(String name, int releaseDate, String director, int duration, String category, String genre) {
        this.setName(name);
        this.setReleaseDate(releaseDate);
        this.setDirector(director);
@@ -36,13 +35,6 @@ public class Movie extends Title {
         this.director = director;
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
 
     @Override
     public String toString() {

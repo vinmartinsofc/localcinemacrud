@@ -1,6 +1,7 @@
 package com.localcinemacrud;
 
 import com.localcinemacrud.model.*;
+import com.localcinemacrud.service.TitleService;
 
 import java.util.Scanner;
 
@@ -8,7 +9,7 @@ public class Runner {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        var setNewTitle = new Title();
+        var setNewTitle = new TitleService(); // era: new Title()
         int option;
 
         try {
@@ -31,26 +32,11 @@ public class Runner {
                         System.out.print("Duration: ");
                         int duration = Integer.parseInt(scanner.nextLine());
 
-                        Category[] categories = Category.values();
+                        System.out.print("Category: ");
+                        String category = scanner.nextLine();
 
-                        System.out.println("Category:");
-                        for (int i = 0; i < categories.length; i++) {
-                            System.out.println(i + " - " + categories[i]);
-                        }
-
-                        int index = Integer.parseInt(scanner.nextLine());
-                        Category category = categories[index];
-
-                        Genres[] genres = Genres.values();
-
-                        System.out.println("Genres:");
-                        for (int i = 0; i < genres.length; i++) {
-                            System.out.println(i + " - " + genres[i]);
-                        }
-
-                        int genresIndex = Integer.parseInt(scanner.nextLine());
-                        Genres genre = genres[genresIndex];
-
+                        System.out.print("Genre: ");
+                        String genre = scanner.nextLine();
 
                         setNewTitle.save(new Movie(name, releaseDate, director, duration, category, genre));
                     }
@@ -65,26 +51,11 @@ public class Runner {
                         System.out.print("Release Date: ");
                         int releaseDate = Integer.parseInt(scanner.nextLine());
 
-                        Category[] categories = Category.values();
+                        System.out.print("Category: ");
+                        String category = scanner.nextLine();
 
-                        System.out.println("Category:");
-                        for (int i = 0; i < categories.length; i++) {
-                            System.out.println(i + " - " + categories[i]);
-                        }
-
-                        int index = Integer.parseInt(scanner.nextLine());
-                        Category category = categories[index];
-
-                        Genres[] genres = Genres.values();
-
-                        System.out.println("Genres:");
-                        for (int i = 0; i < genres.length; i++) {
-                            System.out.println(i + " - " + genres[i]);
-                        }
-
-                        int genresIndex = Integer.parseInt(scanner.nextLine());
-                        Genres genre = genres[genresIndex];
-
+                        System.out.print("Genre: ");
+                        String genre = scanner.nextLine();
 
                         System.out.print("Creator: ");
                         String creator = scanner.nextLine();
@@ -137,6 +108,31 @@ public class Runner {
 
                     case 8: {
 
+
+                    }
+
+                    break;
+
+                    case 9: {
+                        System.out.print("Name: ");
+                        String name = scanner.nextLine();
+
+                        System.out.print("Release: ");
+                        int releaseDate = Integer.parseInt(scanner.nextLine());
+
+                        System.out.print("Category: ");
+                        String category = scanner.nextLine();
+
+                        System.out.print("Genre: ");
+                        String genre = scanner.nextLine();
+
+                        System.out.print("Creator: ");
+                        String creator = scanner.nextLine();
+
+                        System.out.print("Duration: ");
+                        int duration = Integer.parseInt(scanner.nextLine());
+
+                        setNewTitle.save(new Documentary(name, releaseDate, category, genre, creator,duration));
 
                     }
 
