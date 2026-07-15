@@ -1,0 +1,11 @@
+com/localcinemacrud/Runner.class
+com/localcinemacrud/model/Movie.class
+com/localcinemacrud/repository/TitleRepository.class
+com/localcinemacrud/model/WatchedTitle.class
+com/localcinemacrud/model/Documentary.class
+com/localcinemacrud/service/TitleService.class
+com/localcinemacrud/service/WatchedService.class
+com/localcinemacrud/model/Series.class
+com/localcinemacrud/model/Title.class
+com/localcinemacrud/repository/WatchedTitleRepository.class
+com/localcinemacrud/Tests/DateTest.class
