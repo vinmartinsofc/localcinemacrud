@@ -22,6 +22,12 @@ public class Runner {
                 option = Integer.parseInt(scanner.nextLine());
 
                 switch (option) {
+                    case 0: {
+                        System.out.print("Leaving...");
+                    }
+
+                    break;
+
                     case 1: {
                         System.out.print("Name: ");
                         String name = scanner.nextLine();
@@ -159,6 +165,7 @@ public class Runner {
                     case 10: {
                         watchedService.getAll();
                     }
+
                     break;
 
                     case 11: {
@@ -166,6 +173,8 @@ public class Runner {
                         int id = Integer.parseInt(scanner.nextLine());
                         watchedService.delete(id);
                     }
+
+                    break;
 
                     default:
                         System.out.println("Invalid");
