@@ -14,7 +14,7 @@ Aplicação de linha de comando em Java para gerenciar um acervo pessoal de film
 
 ## Tecnologias
 
-- Java 17
+- Java 21
 - Maven
 - PostgreSQL (via JDBC puro, sem ORM)
 
