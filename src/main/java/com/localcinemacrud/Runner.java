@@ -23,7 +23,7 @@ public class Runner {
 
                 switch (option) {
                     case 0: {
-                        System.out.print("Leaving...");
+                        System.out.print("Application closed.");
                     }
 
                     break;
@@ -86,7 +86,7 @@ public class Runner {
                     break;
 
                     case 4: {
-                        System.out.print("id? ");
+                        System.out.print("Enter the title id: ");
                         Integer id = Integer.parseInt(scanner.nextLine());
                         setNewTitle.getById(id);
                     }
@@ -94,16 +94,15 @@ public class Runner {
                     break;
 
                     case 5: {
-                        System.out.print("id? ");
+                        System.out.print("Enter the title id you want to update: ");
                         Integer id = Integer.parseInt(scanner.nextLine());
                         setNewTitle.update(id);
-
                     }
 
                     break;
 
                     case 6: {
-                        System.out.print("id? ");
+                        System.out.print("Enter the title id you want to delete: ");
                         Integer id = Integer.parseInt(scanner.nextLine());
                         setNewTitle.delete(id);
                     }
