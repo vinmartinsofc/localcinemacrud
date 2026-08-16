@@ -37,24 +37,31 @@ public class TitleService {
 
         titles.forEach(System.out::println);
     }
-
-    public void getById(Integer id) {
+    public Title getById(Integer id) {
         Title title = repository.getById(id);
 
         if (title != null) {
             System.out.println(title);
         }
+
+        return title;
     }
 
-    public void update(Integer id) {
-        Title title = repository.getById(id);
 
-        if (title == null) {
+    public void update(Integer id, Title updatedTitle) {
+
+        Title existing = repository.getById(id);
+
+        if (existing == null) {
+            System.out.println("Title with ID " + id + " not found!");
             return;
         }
 
-        // lógica de update vem depois
+        updatedTitle.setId(id);
+
+        repository.update(updatedTitle);
     }
+
 
     public void delete(Integer id) {
         repository.delete(id);

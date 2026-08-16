@@ -95,10 +95,77 @@ public class Runner {
 
                     case 5: {
                         System.out.print("Enter the title id you want to update: ");
-                        Integer id = Integer.parseInt(scanner.nextLine());
-                        setNewTitle.update(id);
-                    }
+                        int id = Integer.parseInt(scanner.nextLine());
 
+                        Title existing = setNewTitle.getById(id);
+                        if (existing == null) {
+                            System.out.println("Title not found!");
+                            break;
+                        }
+
+                        System.out.println("\nEnter new data (press Enter to keep current value)");
+                        System.out.println("Current: " + existing);
+                        System.out.println();
+
+                        System.out.print("Name (" + existing.getName() + "): ");
+                        String name = scanner.nextLine();
+                        if (name.isEmpty()) name = existing.getName();
+
+                        System.out.print("Release Date (" + existing.getReleaseDate() + "): ");
+                        String releaseStr = scanner.nextLine();
+                        int releaseDate = releaseStr.isEmpty() ? existing.getReleaseDate() : Integer.parseInt(releaseStr);
+
+                        System.out.print("Category (" + existing.getCategory() + "): ");
+                        String category = scanner.nextLine();
+                        if (category.isEmpty()) category = existing.getCategory();
+
+                        System.out.print("Genre (" + existing.getGenre() + "): ");
+                        String genre = scanner.nextLine();
+                        if (genre.isEmpty()) genre = existing.getGenre();
+
+                        Title updated = null;
+
+                        if (existing instanceof Movie) {
+                            Movie movie = (Movie) existing;
+                            System.out.print("Director (" + movie.getDirector() + "): ");
+                            String director = scanner.nextLine();
+                            if (director.isEmpty()) director = movie.getDirector();
+
+                            System.out.print("Duration (" + movie.getDuration() + "): ");
+                            String durationStr = scanner.nextLine();
+                            int duration = durationStr.isEmpty() ? movie.getDuration() : Integer.parseInt(durationStr);
+
+                            updated = new Movie(name, releaseDate, category, genre, director, duration);
+
+                        } else if (existing instanceof Series) {
+                            Series series = (Series) existing;
+                            System.out.print("Creator (" + series.getCreator() + "): ");
+                            String creator = scanner.nextLine();
+                            if (creator.isEmpty()) creator = series.getCreator();
+
+                            System.out.print("New Seasons? (" + (series.isNewSeasons() ? "y" : "n") + "): ");
+                            String newSeasonsStr = scanner.nextLine();
+                            boolean newSeasons = newSeasonsStr.isEmpty() ? series.isNewSeasons() : newSeasonsStr.equalsIgnoreCase("y");
+
+                            updated = new Series(name, releaseDate, category, genre, creator, newSeasons);
+
+                        } else if (existing instanceof Documentary) {
+                            Documentary doc = (Documentary) existing;
+                            System.out.print("Creator (" + doc.getCreator() + "): ");
+                            String creator = scanner.nextLine();
+                            if (creator.isEmpty()) creator = doc.getCreator();
+
+                            System.out.print("Duration (" + doc.getDuration() + "): ");
+                            String durationStr = scanner.nextLine();
+                            int duration = durationStr.isEmpty() ? doc.getDuration() : Integer.parseInt(durationStr);
+
+                            updated = new Documentary(name, releaseDate, category, genre, creator, duration);
+                        }
+
+                        if (updated != null) {
+                            setNewTitle.update(id, updated);
+                        }
+                    }
                     break;
 
                     case 6: {
@@ -185,7 +252,6 @@ public class Runner {
 
         } catch (RuntimeException ex) {
             System.out.println("You entered an invalid input");
-            System.out.println("(" + ex + ")");
 
         }
 

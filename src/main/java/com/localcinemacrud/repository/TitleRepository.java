@@ -110,6 +110,49 @@ public class TitleRepository {
         }
     }
 
+    public void update(Title title) {
+        String sql = "UPDATE titles SET name = ?, release_date = ?, category = ?, genre = ?, " +
+                "director = ?, duration = ?, creator = ?, new_seasons = ? WHERE id = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, title.getName());
+            stmt.setInt(2, title.getReleaseDate());
+            stmt.setString(3, title.getCategory());
+            stmt.setString(4, title.getGenre());
+
+            if (title instanceof Movie) {
+                Movie movie = (Movie) title;
+                stmt.setString(5, movie.getDirector());
+                stmt.setInt(6, movie.getDuration());
+                stmt.setNull(7, Types.VARCHAR);
+                stmt.setNull(8, Types.BOOLEAN);
+            } else if (title instanceof Series) {
+                Series series = (Series) title;
+                stmt.setNull(5, Types.VARCHAR);
+                stmt.setNull(6, Types.INTEGER);
+                stmt.setString(7, series.getCreator());
+                stmt.setBoolean(8, series.isNewSeasons());
+            } else if (title instanceof Documentary) {
+                Documentary doc = (Documentary) title;
+                stmt.setNull(5, Types.VARCHAR);
+                stmt.setInt(6, doc.getDuration());
+                stmt.setString(7, doc.getCreator());
+                stmt.setNull(8, Types.BOOLEAN);
+            }
+
+            stmt.setInt(9, title.getId());
+
+            int rows = stmt.executeUpdate();
+            System.out.println(rows > 0 ? "Title updated successfully!" : "Title not found!");
+
+        } catch (SQLException e) {
+            System.out.println("Error updating title: " + e.getMessage());
+        }
+    }
+
+
     public void delete(int id) {
         String sql = "DELETE FROM titles WHERE id = ?";
 
