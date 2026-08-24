@@ -3,9 +3,11 @@ package com.localcinemacrud;
 import com.localcinemacrud.model.*;
 import com.localcinemacrud.service.TitleService;
 import com.localcinemacrud.service.WatchedService;
+import com.localcinemacrud.service.TmdbService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Runner {
@@ -15,6 +17,7 @@ public class Runner {
         Scanner scanner = new Scanner(System.in);
         var setNewTitle = new TitleService();
         var watchedService = new WatchedService();
+        var tmdbService = new TmdbService();
         int option = 0;
 
         try {
@@ -264,6 +267,77 @@ public class Runner {
 
                         break;
 
+                        case 12: {
+                            System.out.print("Enter the name: ");
+                            String query = scanner.nextLine();
+                            List<TmdbResult> results = setNewTitle.searchOnlineAll(query);
+                            tmdbService.displaySearchResults(results);
+                        }
+                        break;
+
+                        case 13: {
+                            System.out.print("Search for movies: ");
+                            String query = scanner.nextLine();
+                            List<TmdbResult> results = setNewTitle.searchOnlineMovies(query);
+                            tmdbService.displaySearchResults(results);
+                        }
+                        break;
+
+                        case 14: {
+                            System.out.print("Search for TV series: ");
+                            String query = scanner.nextLine();
+                            List<TmdbResult> results = setNewTitle.searchOnlineTV(query);
+                            tmdbService.displaySearchResults(results);
+                        }
+                        break;
+
+                        case 15: {
+                            System.out.print("Search for documentaries: ");
+                            String query = scanner.nextLine();
+                            List<TmdbResult> results = setNewTitle.searchOnlineDocumentaries(query);
+                            tmdbService.displaySearchResults(results);
+                        }
+                        break;
+
+                        case 16: {
+                            System.out.print("Search query to import: ");
+                            String query = scanner.nextLine();
+                            List<TmdbResult> results = setNewTitle.searchOnlineAll(query);
+
+                            if (results.isEmpty()) {
+                                System.out.println("No results found to import.");
+                                break;
+                            }
+
+                            tmdbService.displaySearchResults(results);
+
+                            System.out.print("Enter the number of the result to import (0 to cancel): ");
+                            int choice = Integer.parseInt(scanner.nextLine());
+
+                            if (choice > 0 && choice <= results.size()) {
+                                TmdbResult selected = results.get(choice - 1);
+
+                                System.out.println("\nImporting: " + selected.getDisplayName());
+                                System.out.println("Type: " + selected.getMediaType());
+                                System.out.print("Confirm import? (y/n): ");
+                                String confirm = scanner.nextLine();
+
+                                if (confirm.equalsIgnoreCase("y")) {
+                                    boolean success = setNewTitle.importFromTmdb(selected);
+                                    if (success) {
+                                        System.out.println("✓ Title imported successfully from TMDB!");
+                                    } else {
+                                        System.out.println("✗ Failed to import title.");
+                                    }
+                                } else {
+                                    System.out.println("Import cancelled.");
+                                }
+                            } else {
+                                System.out.println("Import cancelled.");
+                            }
+                        }
+                        break;
+
                         default:
                             System.out.println("Invalid");
 
@@ -283,7 +357,6 @@ public class Runner {
             scanner.close();
         }
     }
-
 
 
 }
