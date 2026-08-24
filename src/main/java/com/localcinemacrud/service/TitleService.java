@@ -23,8 +23,9 @@ public class TitleService {
         System.out.println("0 - Exit");
     }
 
-    public void save(Title title) {
-        repository.save(title);
+    public boolean save(Title title) {
+        int result = repository.save(title);
+        return result != -1;
     }
 
     public void getAll() {
@@ -48,18 +49,19 @@ public class TitleService {
     }
 
 
-    public void update(Integer id, Title updatedTitle) {
+    public boolean update(Integer id, Title updatedTitle) {
 
         Title existing = repository.getById(id);
 
         if (existing == null) {
             System.out.println("Title with ID " + id + " not found!");
-            return;
+            return false;
         }
 
         updatedTitle.setId(id);
 
         repository.update(updatedTitle);
+        return true;
     }
 
 
@@ -77,5 +79,6 @@ public class TitleService {
 
         titles.forEach(System.out::println);
     }
+
 
 }

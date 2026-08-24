@@ -9,8 +9,13 @@ import java.util.List;
 public class WatchedService {
     private final WatchedTitleRepository repository = new WatchedTitleRepository();
 
-    public void save(int titleId, LocalDate date, double rating, String comment) {
-        repository.save(new WatchedTitle(titleId, date, rating, comment));
+    public boolean save(int titleId, LocalDate date, double rating, String comment) {
+        try {
+            repository.save(new WatchedTitle(titleId, date, rating, comment));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void getAll() {
@@ -27,4 +32,5 @@ public class WatchedService {
     public void delete(int id) {
         repository.delete(id);
     }
+
 }
