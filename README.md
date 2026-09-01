@@ -1,4 +1,4 @@
-# LocalCinemaCRUD
+# Loca lCinema
 
 Aplicação de linha de comando em Java para gerenciar filmes, séries e documentários.
 
