@@ -10,10 +10,12 @@ public class TmdbResult {
     private String posterPath;
     private String mediaType;
     private String creator;
-    private int duration;
-    private String director;
-    private String genres;
-    private String country;
+    
+    // Novos campos para dados mais completos
+    private int duration; // em minutos
+    private String director; // para filmes
+    private String genres; // gêneros separados por vírgula
+    private String country; // país de origem
 
     public TmdbResult() {}
 
@@ -28,6 +30,7 @@ public class TmdbResult {
         this.mediaType = mediaType;
     }
 
+    // Getters e Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -103,5 +106,4 @@ public class TmdbResult {
         
         return sb.toString();
     }
-
 }

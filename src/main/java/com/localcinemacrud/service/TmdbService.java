@@ -99,16 +99,32 @@ public class TmdbService {
 
                     result.setId(item.getInt("id"));
 
-                    if ("movie".equals(type) || ("multi".equals(type) && item.has("title"))) {
-                        result.setTitle(item.getString("title"));
+                    // Primeiro, determinar o mediaType REAL (para "multi" type)
+                    String detectedMediaType = null;
+                    if ("multi".equals(type) && item.has("media_type")) {
+                        detectedMediaType = item.getString("media_type");
+                    } else if ("movie".equals(type)) {
+                        detectedMediaType = "movie";
+                    } else if ("tv".equals(type)) {
+                        detectedMediaType = "tv";
+                    }
+
+                    // Agora processar baseado no mediaType determinado
+                    if ("movie".equalsIgnoreCase(detectedMediaType)) {
+                        if (item.has("title")) {
+                            result.setTitle(item.getString("title"));
+                        }
                         result.setMediaType("movie");
                         if (item.has("release_date") && !item.isNull("release_date")) {
                             result.setReleaseDate(item.getString("release_date"));
                         }
+                        // Busca detalhes completos do filme
                         enrichMovieDetails(result);
 
-                    } else if ("tv".equals(type) || ("multi".equals(type) && item.has("name"))) {
-                        result.setName(item.getString("name"));
+                    } else if ("tv".equalsIgnoreCase(detectedMediaType)) {
+                        if (item.has("name")) {
+                            result.setName(item.getString("name"));
+                        }
                         result.setMediaType("tv");
                         if (item.has("first_air_date") && !item.isNull("first_air_date")) {
                             result.setReleaseDate(item.getString("first_air_date"));
@@ -120,7 +136,20 @@ public class TmdbService {
                                 result.setCreator(creators.getJSONObject(0).getString("name"));
                             }
                         }
+                        // Busca detalhes completos da série
                         enrichTVDetails(result);
+                        
+                    } else {
+                        // Fallback se não conseguir determinar (trata como movie)
+                        if (item.has("title")) {
+                            result.setTitle(item.getString("title"));
+                        } else if (item.has("name")) {
+                            result.setName(item.getString("name"));
+                        }
+                        result.setMediaType("movie");
+                        if (item.has("release_date") && !item.isNull("release_date")) {
+                            result.setReleaseDate(item.getString("release_date"));
+                        }
                     }
 
                     if (item.has("overview") && !item.isNull("overview")) {
@@ -133,11 +162,6 @@ public class TmdbService {
 
                     if (item.has("poster_path") && !item.isNull("poster_path")) {
                         result.setPosterPath(IMAGE_BASE_URL + item.getString("poster_path"));
-                    }
-
-                    if ("multi".equals(type) && item.has("media_type")) {
-                        String mediaType = item.getString("media_type");
-                        result.setMediaType(mediaType);
                     }
 
                     results.add(result);
@@ -166,6 +190,9 @@ public class TmdbService {
         return results;
     }
 
+    /**
+     * Busca detalhes completos de um filme (duração, gênero, diretor)
+     */
     private void enrichMovieDetails(TmdbResult result) {
         try {
             String urlString = BASE_URL + "/movie/" + result.getId() + "?api_key=" + apiKey;
@@ -184,10 +211,12 @@ public class TmdbService {
 
                 JSONObject json = new JSONObject(content.toString());
 
+                // Duração
                 if (json.has("runtime") && json.getInt("runtime") > 0) {
                     result.setDuration(json.getInt("runtime"));
                 }
 
+                // Gêneros
                 if (json.has("genres")) {
                     JSONArray genres = json.getJSONArray("genres");
                     StringBuilder genresStr = new StringBuilder();
@@ -200,6 +229,7 @@ public class TmdbService {
                     }
                 }
 
+                // País
                 if (json.has("origin_country")) {
                     JSONArray countries = json.getJSONArray("origin_country");
                     if (countries.length() > 0) {
@@ -209,13 +239,18 @@ public class TmdbService {
 
                 conn.disconnect();
                 
+                // Buscar diretor via créditos
                 enrichCredits(result);
             }
         } catch (Exception e) {
+            // Silenciosamente falha se não conseguir pegar os detalhes
             System.out.println("Couldn't fetch full movie details for ID " + result.getId());
         }
     }
 
+    /**
+     * Busca detalhes completos de uma série (duração do episódio, gênero, criador)
+     */
     private void enrichTVDetails(TmdbResult result) {
         try {
             String urlString = BASE_URL + "/tv/" + result.getId() + "?api_key=" + apiKey;
@@ -234,6 +269,7 @@ public class TmdbService {
 
                 JSONObject json = new JSONObject(content.toString());
 
+                // Duração média do episódio
                 if (json.has("episode_run_time")) {
                     JSONArray runtimes = json.getJSONArray("episode_run_time");
                     if (runtimes.length() > 0 && runtimes.getInt(0) > 0) {
@@ -241,6 +277,7 @@ public class TmdbService {
                     }
                 }
 
+                // Gêneros
                 if (json.has("genres")) {
                     JSONArray genres = json.getJSONArray("genres");
                     StringBuilder genresStr = new StringBuilder();
@@ -253,6 +290,7 @@ public class TmdbService {
                     }
                 }
 
+                // País
                 if (json.has("origin_country")) {
                     JSONArray countries = json.getJSONArray("origin_country");
                     if (countries.length() > 0) {
@@ -260,6 +298,7 @@ public class TmdbService {
                     }
                 }
 
+                // Se creator não foi preenchido, tenta obter
                 if (result.getCreator() == null || result.getCreator().isEmpty()) {
                     if (json.has("created_by")) {
                         JSONArray creators = json.getJSONArray("created_by");
@@ -276,6 +315,9 @@ public class TmdbService {
         }
     }
 
+    /**
+     * Busca detalhes de créditos (diretor para filmes)
+     */
     private void enrichCredits(TmdbResult result) {
         try {
             String endpoint = "movie".equalsIgnoreCase(result.getMediaType()) ? "/movie/" : "/tv/";
@@ -338,7 +380,7 @@ public class TmdbService {
                     JSONArray genres = json.getJSONArray("genres");
                     for (int i = 0; i < genres.length(); i++) {
                         JSONObject genre = genres.getJSONObject(i);
-                        if (genre.getInt("id") == 99) {
+                        if (genre.getInt("id") == 99) { // 99 é o ID para Documentary
                             conn.disconnect();
                             return true;
                         }
@@ -352,21 +394,45 @@ public class TmdbService {
         return false;
     }
 
+    /**
+     * Converte um resultado TMDB em um objeto Title para salvar no banco
+     */
     public Title convertToTitle(TmdbResult tmdbResult) {
         String mediaType = tmdbResult.getMediaType();
         String name = tmdbResult.getDisplayName();
         String year = tmdbResult.getReleaseDate() != null ?
                 tmdbResult.getReleaseDate().split("-")[0] : "0";
-        int releaseYear = Integer.parseInt(year);
         
-        String genre = tmdbResult.getGenres() != null && !tmdbResult.getGenres().isEmpty()
+        // DEBUG
+        System.out.println("\n=== DEBUG convertToTitle ===");
+        System.out.println("Name: " + name);
+        System.out.println("MediaType: '" + mediaType + "'");
+        System.out.println("Genres: " + tmdbResult.getGenres());
+        System.out.println("Creator: " + tmdbResult.getCreator());
+        System.out.println("Director: " + tmdbResult.getDirector());
+        System.out.println("Duration: " + tmdbResult.getDuration());
+        System.out.println("========================\n");
+        
+        int releaseYear;
+        try {
+            releaseYear = Integer.parseInt(year);
+        } catch (NumberFormatException e) {
+            releaseYear = 0;
+        }
+        
+        // Usa o gênero da API ou "Unknown" como fallback
+        String genre = tmdbResult.getGenres() != null && !tmdbResult.getGenres().isEmpty() 
                 ? tmdbResult.getGenres().split(",")[0].trim() 
                 : "Unknown";
 
         Title title = null;
 
+        // Determinar tipo baseado em mediaType
         if ("movie".equalsIgnoreCase(mediaType)) {
-            String director = tmdbResult.getDirector() != null ? tmdbResult.getDirector() : "Unknown Director";
+            System.out.println(">>> Creating MOVIE");
+            String director = tmdbResult.getDirector() != null && !tmdbResult.getDirector().isEmpty() 
+                    ? tmdbResult.getDirector() 
+                    : "Unknown Director";
             int duration = tmdbResult.getDuration() > 0 ? tmdbResult.getDuration() : 120;
             
             title = new Movie(
@@ -378,7 +444,10 @@ public class TmdbService {
                     duration
             );
         } else if ("tv".equalsIgnoreCase(mediaType)) {
-            String creator = tmdbResult.getCreator() != null ? tmdbResult.getCreator() : "Unknown Creator";
+            System.out.println(">>> Creating SERIES");
+            String creator = tmdbResult.getCreator() != null && !tmdbResult.getCreator().isEmpty() 
+                    ? tmdbResult.getCreator() 
+                    : "Unknown Creator";
             
             title = new Series(
                     name,
@@ -389,7 +458,10 @@ public class TmdbService {
                     true
             );
         } else if ("documentary".equalsIgnoreCase(mediaType)) {
-            String creator = tmdbResult.getCreator() != null ? tmdbResult.getCreator() : "Unknown Creator";
+            System.out.println(">>> Creating DOCUMENTARY");
+            String creator = tmdbResult.getCreator() != null && !tmdbResult.getCreator().isEmpty() 
+                    ? tmdbResult.getCreator() 
+                    : "Unknown Creator";
             int duration = tmdbResult.getDuration() > 0 ? tmdbResult.getDuration() : 90;
             
             title = new Documentary(
@@ -398,6 +470,22 @@ public class TmdbService {
                     "DOCUMENTARY",
                     genre,
                     creator,
+                    duration
+            );
+        } else {
+            // Fallback: se não conseguir determinar, assume Movie
+            System.out.println(">>> Unknown mediaType '" + mediaType + "' - Creating MOVIE as fallback");
+            String director = tmdbResult.getDirector() != null && !tmdbResult.getDirector().isEmpty() 
+                    ? tmdbResult.getDirector() 
+                    : "Unknown Director";
+            int duration = tmdbResult.getDuration() > 0 ? tmdbResult.getDuration() : 120;
+            
+            title = new Movie(
+                    name,
+                    releaseYear,
+                    "MOVIE",
+                    genre,
+                    director,
                     duration
             );
         }
