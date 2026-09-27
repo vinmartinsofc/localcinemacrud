@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class WatchedTitle {
     private int id;
     private int titleId;
-    private String titleName; // preenchido via join, não salvo diretamente
+    private String titleName;
     private LocalDate watchedDate;
     private double rating;
     private String comment;

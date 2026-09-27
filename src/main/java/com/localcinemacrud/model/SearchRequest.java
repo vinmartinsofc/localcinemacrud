@@ -2,7 +2,7 @@ package com.localcinemacrud.model;
 
 public class SearchRequest {
     private String query;
-    private String type; // "movie", "tv", "documentary", "all"
+    private String type;
 
     public SearchRequest(String query, String type) {
         this.query = query;
