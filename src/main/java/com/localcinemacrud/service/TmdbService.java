@@ -99,13 +99,16 @@ public class TmdbService {
 
                     result.setId(item.getInt("id"));
 
-                    if ("movie".equals(type) || "multi".equals(type) && item.has("title")) {
+                    if ("movie".equals(type) || ("multi".equals(type) && item.has("title"))) {
                         result.setTitle(item.getString("title"));
                         result.setMediaType("movie");
                         if (item.has("release_date") && !item.isNull("release_date")) {
                             result.setReleaseDate(item.getString("release_date"));
                         }
-                    } else if ("tv".equals(type) || "multi".equals(type) && item.has("name")) {
+                        // Busca detalhes completos do filme
+                        enrichMovieDetails(result);
+
+                    } else if ("tv".equals(type) || ("multi".equals(type) && item.has("name"))) {
                         result.setName(item.getString("name"));
                         result.setMediaType("tv");
                         if (item.has("first_air_date") && !item.isNull("first_air_date")) {
@@ -118,6 +121,8 @@ public class TmdbService {
                                 result.setCreator(creators.getJSONObject(0).getString("name"));
                             }
                         }
+                        // Busca detalhes completos da série
+                        enrichTVDetails(result);
                     }
 
                     if (item.has("overview") && !item.isNull("overview")) {
@@ -163,6 +168,175 @@ public class TmdbService {
         return results;
     }
 
+    /**
+     * Busca detalhes completos de um filme (duração, gênero, diretor)
+     */
+    private void enrichMovieDetails(TmdbResult result) {
+        try {
+            String urlString = BASE_URL + "/movie/" + result.getId() + "?api_key=" + apiKey;
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+
+                JSONObject json = new JSONObject(content.toString());
+
+                // Duração
+                if (json.has("runtime") && json.getInt("runtime") > 0) {
+                    result.setDuration(json.getInt("runtime"));
+                }
+
+                // Gêneros
+                if (json.has("genres")) {
+                    JSONArray genres = json.getJSONArray("genres");
+                    StringBuilder genresStr = new StringBuilder();
+                    for (int i = 0; i < genres.length(); i++) {
+                        if (i > 0) genresStr.append(", ");
+                        genresStr.append(genres.getJSONObject(i).getString("name"));
+                    }
+                    if (genresStr.length() > 0) {
+                        result.setGenres(genresStr.toString());
+                    }
+                }
+
+                // País
+                if (json.has("origin_country")) {
+                    JSONArray countries = json.getJSONArray("origin_country");
+                    if (countries.length() > 0) {
+                        result.setCountry(countries.getString(0));
+                    }
+                }
+
+                conn.disconnect();
+                
+                // Buscar diretor via créditos
+                enrichCredits(result);
+            }
+        } catch (Exception e) {
+            // Silenciosamente falha se não conseguir pegar os detalhes
+            System.out.println("Couldn't fetch full movie details for ID " + result.getId());
+        }
+    }
+
+    /**
+     * Busca detalhes completos de uma série (duração do episódio, gênero, criador)
+     */
+    private void enrichTVDetails(TmdbResult result) {
+        try {
+            String urlString = BASE_URL + "/tv/" + result.getId() + "?api_key=" + apiKey;
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+
+                JSONObject json = new JSONObject(content.toString());
+
+                // Duração média do episódio
+                if (json.has("episode_run_time")) {
+                    JSONArray runtimes = json.getJSONArray("episode_run_time");
+                    if (runtimes.length() > 0 && runtimes.getInt(0) > 0) {
+                        result.setDuration(runtimes.getInt(0));
+                    }
+                }
+
+                // Gêneros
+                if (json.has("genres")) {
+                    JSONArray genres = json.getJSONArray("genres");
+                    StringBuilder genresStr = new StringBuilder();
+                    for (int i = 0; i < genres.length(); i++) {
+                        if (i > 0) genresStr.append(", ");
+                        genresStr.append(genres.getJSONObject(i).getString("name"));
+                    }
+                    if (genresStr.length() > 0) {
+                        result.setGenres(genresStr.toString());
+                    }
+                }
+
+                // País
+                if (json.has("origin_country")) {
+                    JSONArray countries = json.getJSONArray("origin_country");
+                    if (countries.length() > 0) {
+                        result.setCountry(countries.getString(0));
+                    }
+                }
+
+                // Se creator não foi preenchido, tenta obter
+                if (result.getCreator() == null || result.getCreator().isEmpty()) {
+                    if (json.has("created_by")) {
+                        JSONArray creators = json.getJSONArray("created_by");
+                        if (creators.length() > 0) {
+                            result.setCreator(creators.getJSONObject(0).getString("name"));
+                        }
+                    }
+                }
+
+                conn.disconnect();
+            }
+        } catch (Exception e) {
+            System.out.println("Couldn't fetch full TV details for ID " + result.getId());
+        }
+    }
+
+    /**
+     * Busca detalhes de créditos (diretor para filmes)
+     */
+    private void enrichCredits(TmdbResult result) {
+        try {
+            String endpoint = "movie".equalsIgnoreCase(result.getMediaType()) ? "/movie/" : "/tv/";
+            String urlString = BASE_URL + endpoint + result.getId() + "/credits?api_key=" + apiKey;
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+
+                JSONObject json = new JSONObject(content.toString());
+
+                if ("movie".equalsIgnoreCase(result.getMediaType()) && json.has("crew")) {
+                    JSONArray crew = json.getJSONArray("crew");
+                    StringBuilder directorsStr = new StringBuilder();
+                    for (int i = 0; i < crew.length(); i++) {
+                        JSONObject person = crew.getJSONObject(i);
+                        if ("Director".equals(person.getString("job"))) {
+                            if (directorsStr.length() > 0) directorsStr.append(", ");
+                            directorsStr.append(person.getString("name"));
+                        }
+                    }
+                    if (directorsStr.length() > 0) {
+                        result.setDirector(directorsStr.toString());
+                    }
+                }
+
+                conn.disconnect();
+            }
+        } catch (Exception e) {
+            System.out.println("Couldn't fetch credits for ID " + result.getId());
+        }
+    }
+
     private boolean isDocumentary(int tvId) {
         try {
             String urlString = BASE_URL + "/tv/" + tvId + "?api_key=" + apiKey;
@@ -184,7 +358,7 @@ public class TmdbService {
                     JSONArray genres = json.getJSONArray("genres");
                     for (int i = 0; i < genres.length(); i++) {
                         JSONObject genre = genres.getJSONObject(i);
-                        if (genre.getInt("id") == 99) {
+                        if (genre.getInt("id") == 99) { // 99 é o ID para Documentary
                             conn.disconnect();
                             return true;
                         }
@@ -198,27 +372,38 @@ public class TmdbService {
         return false;
     }
 
+    /**
+     * Converte um resultado TMDB em um objeto Title para salvar no banco
+     */
     public Title convertToTitle(TmdbResult tmdbResult) {
         String mediaType = tmdbResult.getMediaType();
         String name = tmdbResult.getDisplayName();
         String year = tmdbResult.getReleaseDate() != null ?
                 tmdbResult.getReleaseDate().split("-")[0] : "0";
         int releaseYear = Integer.parseInt(year);
-        String genre = "Unknown";
+        
+        // Usa o gênero da API ou "Unknown" como fallback
+        String genre = tmdbResult.getGenres() != null && !tmdbResult.getGenres().isEmpty() 
+                ? tmdbResult.getGenres().split(",")[0].trim() 
+                : "Unknown";
 
         Title title = null;
 
         if ("movie".equalsIgnoreCase(mediaType)) {
+            String director = tmdbResult.getDirector() != null ? tmdbResult.getDirector() : "Unknown Director";
+            int duration = tmdbResult.getDuration() > 0 ? tmdbResult.getDuration() : 120;
+            
             title = new Movie(
                     name,
                     releaseYear,
                     "MOVIE",
                     genre,
-                    "Unknown Director",
-                    120
+                    director,
+                    duration
             );
         } else if ("tv".equalsIgnoreCase(mediaType)) {
-            String creator = tmdbResult.getCreator() != null ? tmdbResult.getCreator() : "Unknown";
+            String creator = tmdbResult.getCreator() != null ? tmdbResult.getCreator() : "Unknown Creator";
+            
             title = new Series(
                     name,
                     releaseYear,
@@ -227,41 +412,52 @@ public class TmdbService {
                     creator,
                     true
             );
-        } else {
+        } else if ("documentary".equalsIgnoreCase(mediaType)) {
+            String creator = tmdbResult.getCreator() != null ? tmdbResult.getCreator() : "Unknown Creator";
+            int duration = tmdbResult.getDuration() > 0 ? tmdbResult.getDuration() : 90;
+            
             title = new Documentary(
                     name,
                     releaseYear,
                     "DOCUMENTARY",
                     genre,
-                    "Unknown Creator",
-                    90
+                    creator,
+                    duration
             );
         }
 
         return title;
     }
 
+    /**
+     * Exibe os resultados da busca de forma formatada e legível
+     */
     public void displaySearchResults(List<TmdbResult> results) {
         if (results.isEmpty()) {
             System.out.println("No results found.");
             return;
         }
 
-        System.out.println("\n=== TMDB Search Results ===");
+        System.out.println("\n" + "=".repeat(80));
+        System.out.println("TMDB SEARCH RESULTS");
+        System.out.println("=".repeat(80));
+        
         for (int i = 0; i < results.size(); i++) {
             TmdbResult result = results.get(i);
-            System.out.printf("%d. %s%n", i + 1, result);
+            System.out.printf("%n%d. %s%n", i + 1, result);
+            
             if (result.getOverview() != null && !result.getOverview().isEmpty()) {
                 String overview = result.getOverview();
-                if (overview.length() > 100) {
-                    overview = overview.substring(0, 100) + "...";
+                if (overview.length() > 150) {
+                    overview = overview.substring(0, 150) + "...";
                 }
-                System.out.println("   " + overview);
+                System.out.println("  Overview: " + overview);
             }
+            
             if (result.getPosterPath() != null) {
-                System.out.println("   Poster: " + result.getPosterPath());
+                System.out.println("  Poster: " + result.getPosterPath());
             }
-            System.out.println();
         }
+        System.out.println("\n" + "=".repeat(80) + "\n");
     }
 }

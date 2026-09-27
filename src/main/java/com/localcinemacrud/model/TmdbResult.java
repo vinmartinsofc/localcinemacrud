@@ -10,6 +10,12 @@ public class TmdbResult {
     private String posterPath;
     private String mediaType;
     private String creator;
+    
+    // Novos campos para dados mais completos
+    private int duration; // em minutos
+    private String director; // para filmes
+    private String genres; // gêneros separados por vírgula
+    private String country; // país de origem
 
     public TmdbResult() {}
 
@@ -24,7 +30,7 @@ public class TmdbResult {
         this.mediaType = mediaType;
     }
 
-
+    // Getters e Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -52,16 +58,52 @@ public class TmdbResult {
     public String getCreator() { return creator; }
     public void setCreator(String creator) { this.creator = creator; }
 
+    public int getDuration() { return duration; }
+    public void setDuration(int duration) { this.duration = duration; }
+
+    public String getDirector() { return director; }
+    public void setDirector(String director) { this.director = director; }
+
+    public String getGenres() { return genres; }
+    public void setGenres(String genres) { this.genres = genres; }
+
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+
     public String getDisplayName() {
         return title != null ? title : name;
     }
 
     @Override
     public String toString() {
-        return String.format("[TMDB] %s (%s) - Rating: %.1f/10 | %s",
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("[TMDB] %s (%s)%n", 
                 getDisplayName(),
-                releaseDate != null ? releaseDate.split("-")[0] : "N/A",
-                voteAverage,
-                mediaType != null ? mediaType.toUpperCase() : "UNKNOWN");
+                releaseDate != null ? releaseDate.split("-")[0] : "N/A"));
+        
+        if (genres != null && !genres.isEmpty()) {
+            sb.append(String.format("  Genre: %s%n", genres));
+        }
+        
+        if (duration > 0) {
+            if ("movie".equalsIgnoreCase(mediaType)) {
+                sb.append(String.format("  Duration: %d minutes%n", duration));
+            } else if ("tv".equalsIgnoreCase(mediaType)) {
+                sb.append(String.format("  Avg episode: ~%d minutes%n", duration));
+            }
+        }
+        
+        if (director != null && !director.isEmpty()) {
+            sb.append(String.format("  Director: %s%n", director));
+        }
+        
+        if (creator != null && !creator.isEmpty()) {
+            sb.append(String.format("  Creator: %s%n", creator));
+        }
+        
+        sb.append(String.format("  Rating: %.1f/10%n", voteAverage));
+        sb.append(String.format("  Type: %s", mediaType != null ? mediaType.toUpperCase() : "UNKNOWN"));
+        
+        return sb.toString();
     }
 }
