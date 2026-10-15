@@ -1,0 +1,11 @@
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/Runner.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/Tests/DateTest.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/model/Documentary.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/model/Movie.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/model/Series.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/model/Title.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/model/WatchedTitle.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/repository/TitleRepository.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/repository/WatchedTitleRepository.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/service/TitleService.java
+/home/vin/IdeaProjects/local_cinema_crud/src/main/java/com/localcinemacrud/service/WatchedService.java
